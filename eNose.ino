@@ -2,46 +2,43 @@
 #include <Wire.h>
 
 const int MQ3Pin = A0;  // Alcohol sensor pin
-SGP30 mySensor;
-long t1, t2;
+SGP30 AQSensor; // Air quality sensor object
+long t1, t2; // For timing
 
 long CO2, TVOC, H2, ethanol, alcohol;
 
 void setup() {
-  // put your setup code here, to run once:
-
   Serial.begin(9600);
   Wire.begin();
   Wire.setClock(400000);
 
-  // Serial.println("hello");
-
-  if (mySensor.begin() == false) {
+  if (AQSensor.begin() == false) {
     Serial.println(F("SGP30 not detected. Check connections. Freezing..."));
     while (1)
       ;  // Do nothing more
   }
 
-  // Serial.println("hello2");
   mySensor.initAirQuality();
   t1 = millis();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   t2 = millis();
   if (t2 >= t1 + 1000) {
     t1 = t2;
-    mySensor.measureAirQuality();
-    CO2 = mySensor.CO2; // in ppm
-    TVOC = mySensor.TVOC; // in ppb
+    // Get air quality sensor data
+    AQSensor.measureAirQuality();
+    CO2 = AQSensor.CO2; // in ppm
+    TVOC = AQSensor.TVOC; // in ppb
 
-    mySensor.measureRawSignals();
-    H2 = mySensor.H2;
-    ethanol = mySensor.ethanol;
+    AQSensor.measureRawSignals();
+    H2 = AQSensor.H2;
+    ethanol = AQSensor.ethanol;
 
-    alcohol = analogRead(MQ3Pin);
+    alcohol = analogRead(MQ3Pin); // Read alcohol sensor value
 
+    
+    // Output readings in csv format
     Serial.print(CO2);
     Serial.print(", ");
     Serial.print(TVOC);
